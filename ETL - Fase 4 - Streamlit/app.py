@@ -40,12 +40,12 @@ elif page == "Data Analysis":
     st.dataframe(df.head())
 
 
-    # LLamar la funciones en visualizations.py
-    visualizations.rating_distribution(df) # Distribución de Ratings
-    visualizations.property_type_distribution(df) # Distribución de Tipos de Propiedades
-    visualizations.beds_ratings_scatter(df) # Relación entre Número de Camas y Ratings
-    visualizations.beds_distribution_histogram(df) # Distribuição do Número de Camas
-    visualizations.reviews_rating_distribution(df) # Distribuição de Reseñas y Valoraciones por tipo de alojamiento  
+    # LLamar las funciones en visualizations.py
+    visualizations.rating_distribution(df)
+    visualizations.property_type_distribution(df)
+    visualizations.beds_ratings_scatter(df)
+    visualizations.beds_distribution_histogram(df)
+    visualizations.reviews_rating_distribution(df)
 
 
     # Agregar otros gráficos relevantes para análisis de datos (Estudiar graficos interesantes hechos en el EDA)
@@ -68,12 +68,11 @@ elif page == "Price Analysis":
     # Filtrar los datos por el rango de precios seleccionado
     datos_filtrados = df[(df["Prices_per_night"] > rango[0]) & (df["Prices_per_night"] < rango[1])]
     
-    
-    visualizations.price_property_types(df)  # Llama a la función para el gráfico por tipo de propiedad
-    visualizations.price_rating_distribution(df)  # Llama a la función para la distribución de precio/rating
-    visualizations.price_distribution_histogram(df)  # Distribución de Precios por Noche
-    visualizations.average_price_by_capacity(df) # Precio Medio por Capacidad Máxima de Huéspedes
-    visualizations.price_distribution_bar_chart(df)  # Gráfico de barras da distribuição de preços
+    visualizations.price_property_types(df) 
+    visualizations.price_rating_distribution(df)
+    visualizations.price_distribution_histogram(df)
+    visualizations.average_price_by_capacity(df)
+    visualizations.price_distribution_bar_chart(df)
 
 
 # Sección "About"

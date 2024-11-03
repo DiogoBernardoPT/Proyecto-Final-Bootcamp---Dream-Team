@@ -39,23 +39,22 @@ def average_price_by_capacity(df):
                 title="Precio Medio por Capacidad Máxima de Huéspedes")
     st.plotly_chart(fig, use_container_width=True)    
 
+# Función para la gráfica de histograma que muestra la frecuencia de precios en los alojamientos
 def price_distribution_histogram(df):
     fig = px.histogram(df, x='Prices_per_night', nbins=30, 
                     title="Distribución de Precios por Noche")
     st.plotly_chart(fig, use_container_width=True)
 
+# Función para el gráfico de barras que agrupa precios en intervalos para analizar su distribución
 def price_distribution_bar_chart(df):
     # Agrupar por intervalos de preço
     intervalos = pd.cut(df["Prices_per_night"], bins=10)
     conteo_por_intervalo = df.groupby(intervalos).size()
 
-    # Criar gráfico de barras
     bar_chart = px.bar(x=conteo_por_intervalo.index.astype(str), 
                         y=conteo_por_intervalo.values, 
-                        labels={'x': 'Intervalos de Preço', 'y': 'Contagem'},
+                        labels={'x': 'Intervalos de Precio', 'y': 'Conteo'},
                         title='Distribución de Precios en el Rango Seleccionado')
-    
-    # Mostrar o gráfico
     st.plotly_chart(bar_chart, use_container_width=True)
 
 # Función para la gráfica de distribución de Reseñas y Valoraciones por tipo de alojamiento
@@ -87,9 +86,9 @@ def beds_distribution_histogram(df):
                     title="Distribución del Número de Camas")
     st.plotly_chart(fig, use_container_width=True)
 
-# Función para la gráfica de relación entre número de camas y ratings
+# Función para la gráfica de dispersión de relación entre número de camas y ratings
 def beds_ratings_scatter(df):
-    # Gráfico de dispersión que muestra la relación entre el número de camas y las valoraciones.
+
     fig = px.scatter(df, x='Camas', y='Ratings', color='Property_types',
                     title="Relación entre Número de Camas y Ratings",
                     labels={"Camas": "Número de Camas", "Ratings": "Ratings"})
