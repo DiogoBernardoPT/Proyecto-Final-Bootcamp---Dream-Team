@@ -115,7 +115,7 @@ elif page == 'Price Analysis':
                             format='€%d')  # Formato opcional para mostrar el símbolo del euro
     
     # Filtrar el DataFrame con el rango de precios
-    df_filtered = df.copy()  # Asegúrate de que df_filtered esté basado en el DataFrame original
+    df_filtered = df.copy()  # Asegurar de que df_filtered esté basado en el DataFrame original
     df_filtered = df_filtered[(df_filtered['Prices_per_night'] >= price_range[0]) & 
                             (df_filtered['Prices_per_night'] <= price_range[1])]
 
