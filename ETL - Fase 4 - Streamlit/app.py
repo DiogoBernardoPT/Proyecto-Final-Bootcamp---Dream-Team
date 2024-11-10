@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from PIL import Image
 from modules import visualizations
+from modules.visualizations import correlation
 
 st.set_page_config(page_title='Dashboard de Airbnb', page_icon='🏠', layout='wide')
 
@@ -18,7 +19,8 @@ st.markdown('''
 uploader = st.file_uploader('Sube el archivo CSV de datos', type='csv')
 if uploader:
     df = pd.read_csv(uploader)
-    
+
+    df = df.drop(columns=['urls', 'timestamp', 'record_id', 'titles', 'location', 'host_name'])    
 
 # Barra lateral para navegar entre las pestañas
 page = st.sidebar.selectbox('Navega por las secciones', ['Home', 'Data Analysis', 'Price Analysis', 'Locations', 'About'])
@@ -50,10 +52,10 @@ elif page == 'Data Analysis':
 
     # Configurar controles de filtro
     property_type = st.multiselect('Selecciona el tipo de propiedad:', 
-                                    options=df['Property_types'].unique(), 
+                                    options=df['property_types'].unique(), 
                                     default=None)
     rating_options = ['1-2', '3-4', '4-5']
-    selected_rating_range = st.selectbox('Selecciona un rango de Ratings:', options=rating_options)
+    selected_rating_range = st.selectbox('Selecciona un rango de ratings:', options=rating_options)
     num_reviews_input = st.number_input('Ingresa el número mínimo de reseñas:', min_value=0, step=1)
 
     # Botón para aplicar filtros
@@ -63,17 +65,17 @@ elif page == 'Data Analysis':
     if apply_filters:
         # Aplicar filtros si el botón es pulsado
         if selected_rating_range == '1-2':
-            df_filtered = df_filtered[(df_filtered['Ratings'] >= 1) & (df_filtered['Ratings'] <= 2)]
+            df_filtered = df_filtered[(df_filtered['ratings'] >= 1) & (df_filtered['ratings'] <= 2)]
         elif selected_rating_range == '3-4':
-            df_filtered = df_filtered[(df_filtered['Ratings'] > 2) & (df_filtered['Ratings'] <= 4)]
+            df_filtered = df_filtered[(df_filtered['ratings'] > 2) & (df_filtered['ratings'] <= 4)]
         elif selected_rating_range == '4-5':
-            df_filtered = df_filtered[(df_filtered['Ratings'] > 4) & (df_filtered['Ratings'] <= 5)]
+            df_filtered = df_filtered[(df_filtered['ratings'] > 4) & (df_filtered['ratings'] <= 5)]
         
         if num_reviews_input > 0:
-            df_filtered = df_filtered[df_filtered['Num_reviews'] >= num_reviews_input]
+            df_filtered = df_filtered[df_filtered['num_reviews'] >= num_reviews_input]
         
         if property_type:
-            df_filtered = df_filtered[df_filtered['Property_types'].isin(property_type)]
+            df_filtered = df_filtered[df_filtered['property_types'].isin(property_type)]
         
         df_to_use = df_filtered  # Usar DataFrame filtrado en visualizaciones
 
@@ -109,17 +111,18 @@ elif page == 'Price Analysis':
     ''')
     # Control deslizante para el rango de precios
     price_range = st.slider('Rango de precios por noche:', 
-                            min_value=int(df['Prices_per_night'].min()), 
-                            max_value=int(df['Prices_per_night'].max()), 
-                            value=(int(df['Prices_per_night'].min()), int(df['Prices_per_night'].max())), 
+                            min_value=int(df['prices_per_night'].min()), 
+                            max_value=int(df['prices_per_night'].max()), 
+                            value=(int(df['prices_per_night'].min()), int(df['prices_per_night'].max())), 
                             format='€%d')  # Formato opcional para mostrar el símbolo del euro
     
     # Filtrar el DataFrame con el rango de precios
-    df_filtered = df.copy()  # Asegurar de que df_filtered esté basado en el DataFrame original
-    df_filtered = df_filtered[(df_filtered['Prices_per_night'] >= price_range[0]) & 
-                            (df_filtered['Prices_per_night'] <= price_range[1])]
+    df_filtered = df.copy()  # Asegúrate de que df_filtered esté basado en el DataFrame original
+    df_filtered = df_filtered[(df_filtered['prices_per_night'] >= price_range[0]) & 
+                            (df_filtered['prices_per_night'] <= price_range[1])]
 
     # Llamar las funciones en visualizations.py
+    visualizations.correlation(df_filtered)
     visualizations.price_property_types(df_filtered)
     visualizations.price_rating_distribution(df_filtered)
     visualizations.price_distribution_histogram(df_filtered)
@@ -135,3 +138,7 @@ elif page == 'About':
     Facilitadores : Diogo Bernardo, Jesús Mula, Sandra Mirambell         
     ''')
 
+
+if __name__ == '__main__':
+    
+    pass
