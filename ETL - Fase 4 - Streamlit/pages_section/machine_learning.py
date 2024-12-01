@@ -2,6 +2,7 @@ import streamlit as st
 import joblib
 import numpy as np
 import pandas as pd
+from modules.visualizations import show_feature_importance
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, root_mean_squared_error
 
 # Funciones auxiliares para cargar los diferentes modelos y escaladores
@@ -89,6 +90,21 @@ def show_price_prediction(df_processed):
     metrics_df = pd.read_csv("data/lightgbm_metrics.csv")
 
     st.dataframe(metrics_df)
+
+    with st.expander("Feature Importance Chart"):
+    # Call the visualization function
+        show_feature_importance()
+    
+    # Write the hypothesis below the chart
+        st.write("""
+        - **Ratings**: Properties with higher ratings are likely to command premium prices, reflecting customer satisfaction.
+        - **Number of Reviews**: A higher number of reviews often indicates popularity and demand.
+        - **Cleaning Fee**: The additional cleaning fee impacts the total price, highlighting its importance in determining overall cost.
+        - **Kitchen and Dining Amenities**: These features contribute significantly to pricing, as they add value for longer stays or family-oriented accommodations.
+        - **Exterior Features**: Outdoor spaces or aesthetics enhance property appeal and justify higher prices.
+        These factors align with the intuition that customer feedback, service fees, and amenities are key determinants of property pricing in the Airbnb market.
+    """)
+    
 
 def show_neural_network_price_prediction(df_processed):
     st.header("💸 Price Prediction Model (Neural Networks)")

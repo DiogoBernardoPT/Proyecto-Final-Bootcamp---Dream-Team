@@ -67,6 +67,8 @@ def load_and_display_pickle(file_path):
 # Prices Visualizations
 # =====================================
 
+
+
 # Mapa de correlación
 def correlation(df):
     st.subheader('Correlation Map')
@@ -111,6 +113,11 @@ def price_distribution_histogram(df):
     fig.update_traces(marker_line_width=1, marker_line_color='black')
     st.plotly_chart(fig, use_container_width=True)
 
+# Feature Importance del mejor modelo
+def show_feature_importance():
+    with open('models/feature_importance_plotly.pkl', 'rb') as f:
+        fig = pickle.load(f)
+    st.plotly_chart(fig)
 
 # Servicios
 # =====================================
