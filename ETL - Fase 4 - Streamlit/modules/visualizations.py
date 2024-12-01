@@ -1,8 +1,10 @@
 import streamlit as st
+import pickle
 import plotly.express as px
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from modules.sql_connection import fetch_top_10_services
 
 
 # Exploratory Data Analysis
@@ -38,6 +40,15 @@ def reviews_rating_distribution(df):
     )
     st.plotly_chart(reviews_rating_distr, use_container_width=True)
 
+# Price Outliers
+# =====================================
+
+# Funcion para cargar graficas con pickle
+def load_and_display_pickle(file_path):
+    with open(file_path, 'rb') as f:
+        fig = pickle.load(f)
+    st.plotly_chart(fig, use_container_width=True)
+
 
 # Prices Visualizations
 # =====================================
@@ -45,7 +56,8 @@ def reviews_rating_distribution(df):
 # Mapa de correlación
 def correlation(df):
     st.subheader('Correlation Map')
-    df_corr = df.select_dtypes(include=['float64', 'int64'])
+    df_cleaned = df.drop(columns=['urls', 'timestamp', 'record_id', 'titles', 'location', 'host_name'], errors='ignore')
+    df_corr = df_cleaned.select_dtypes(include=['float64', 'int64'])
     correlation_matrix = df_corr.corr()
 
     fig, ax = plt.subplots(figsize=(10, 4))
@@ -81,7 +93,7 @@ def average_price_by_capacity(df):
 # Función para la gráfica de dispersión de precios
 def price_distribution_histogram(df):
     st.subheader('Price per Night Distribution')
-    fig = px.histogram(df, x='prices_per_night', nbins=30)
+    fig = px.histogram(df, x='prices_per_night', nbins=80)
     fig.update_traces(marker_line_width=1, marker_line_color='black')
     st.plotly_chart(fig, use_container_width=True)
 
@@ -89,25 +101,22 @@ def price_distribution_histogram(df):
 # Servicios
 # =====================================
 
-def top_10_services_chart(df1, df2):
-    # Hacemos merge del df de la habitacion con el de servicios
-    df3 = pd.merge(left=df1, right=df2, how='inner', on="urls")
+def top_10_services_chart():
+    # Conexion con sql_connection.py
+    data = fetch_top_10_services()
 
-    df_services_merged = df3[['urls', 'prices_per_night', 'category', 'services']]
+    df = pd.DataFrame(data, columns=["service", "count"])
 
-    # Averiguamos los 10 servicios mas ofrecidos
-    top_10_services = df_services_merged.groupby("services").agg({"prices_per_night": "count"}).sort_values("prices_per_night", ascending=False).head(10).index
-    top_10_df = df_services_merged[df_services_merged["services"].isin(top_10_services)]
-
-    fig = px.bar(top_10_df, 
-                 x="services", 
-                 title="Top 10 Serviços Mais Oferecidos no Airbnb", 
-                 labels={"services": "Serviços", "prices_per_night": "Conteúdo"},
-                 category_orders={"services": top_10_services},
-                 color="services", 
-                 text_auto=True)
-
-    st.plotly_chart(fig, use_container_width=True)    
+    fig = px.bar(
+        df,
+        x="service",
+        y="count",
+        title="Top 10 Most Offered Services on Airbnb",
+        labels={"service": "Services", "count": "Count"},
+        text_auto=True,
+        color="service"
+    )
+    st.plotly_chart(fig, use_container_width=True)   
 
 
 

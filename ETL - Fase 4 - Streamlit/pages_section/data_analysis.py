@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from modules import visualizations
+from modules.sql_connection import fetch_top_10_services
 
 
 def show(df):
@@ -22,7 +23,7 @@ def show(df):
     ''')
 
     st.subheader('First Rows of the DataFrame')
-    df_display = df.drop(columns=['urls', 'timestamp', 'record_id', 'titles', 'location', 'host_name'])
+    df_display = df.drop(columns=['timestamp', 'record_id', 'titles', 'location', 'host_name'])
     st.dataframe(df_display.head())
 
     df_filtered = df.copy()
@@ -66,34 +67,63 @@ def show(df):
                                   (df_filtered['prices_per_night'] <= price_range[1])]
 
         st.subheader('Filtered Listings')
-        df_filtered_display = df_filtered.drop(columns=['urls', 'timestamp', 'record_id', 'titles', 'location', 'host_name'])
+        df_filtered_display = df_filtered.drop(columns=['timestamp', 'record_id', 'titles', 'location', 'host_name'])
         st.dataframe(df_filtered_display.head())
     else:
         st.subheader('Listings Without Filters')
-        df_display = df.drop(columns=['urls', 'timestamp', 'record_id', 'titles', 'location', 'host_name'])
+        df_display = df.drop(columns=['timestamp', 'record_id', 'titles', 'location', 'host_name'])
         st.dataframe(df_display.head())
 
-    # Visualizaciones EDA lado a lado
+    # Visualizaciones iniciales de precio y outliers
+    col1, col2 = st.columns(2)
+    with col1:
+        visualizations.load_and_display_pickle('images/analysis/price_boxplot.pkl')
+    with col2:
+        visualizations.load_and_display_pickle('images/analysis/price_zscore.pkl')
+
+    with st.expander("Click to see insights from the Z-score analysis"):
+        st.write(""" 
+    - **Price Distribution with Z-score**: The price analysis shows where most prices are concentrated.
+        However, there are some higher prices, between 200 and 239, that exceed the Z-score limit. 
+        While these values are technically outliers, they do not necessarily indicate erroneous data but rather higher prices 
+        that may correspond to luxury accommodations or those with special features. In these cases, is important to understand
+        that not all outliers should be removed. Instead, they should be analyzed in context to uncover insights about unique
+        market segments, such as premium offerings or niche properties that cater to specific customer preferences.
+        """)
+
+# Visualizaciones EDA lado a lado
     st.subheader('**Data Visualizations**')
     col1, col2 = st.columns(2)
-    
+
     with col1:
         visualizations.price_rating_distribution(df_filtered)
     with col2:
         visualizations.average_price_by_capacity(df_filtered)
 
-    # Anadir hipotesis aqui
+# Anadir hipotesis aqui
     with st.expander("Click to see insights from the graphs above"):
         st.write("""
-        - **Property Type Distribution**: Breakdown of the different types of properties listed.
-        - **Average Price by Maximum Guest Capacity**: Average price per night based on the maximum number of guests a property can accommodate.         
+    - **Price Rating Distribution**: This visualization provides insights into the relationship between property ratings and nightly
+        prices across various property types.it becomes evident that higher-rated properties often align with mid-range pricing, 
+        but there are exceptions. Some unique property types maintain both high ratings and significantly higher prices.
+        This analysis not only identifies key patterns but also underscores how property type and guest ratings influence pricing
+        dynamics, offering valuable insights into market positioning and customer preferences.
+    - **Average Price by Maximum Guest Capacity**: This visualization highlights the relationship between the maximum guest capacity of a
+        property and its average price. As expected, there is a general trend where properties with a higher guest 
+        capacity tend to have higher nightly prices. However, it is worth noting that while the trend is generally linear, there 
+        are some exceptions. These anomalies might be influenced by other factors, such as property location, luxury features, 
+        or unique offerings that make smaller-capacity listings more expensive than expected.        
         """)
-    
-    # Visualizacion con relacion al precio
-    st.header('Price Analysis')
 
     with st.expander("Correlation Map"):
         visualizations.correlation(df_filtered)
+        st.write("""
+    - **Correlation Insights**: This map highlights relationships between variables, with darker colors 
+        indicating stronger correlations. Pay special attention to the correlation between price and guest capacity,
+        as well as rooms, beds, baths and cleaning fee. This suggests that larger accommodations or those offering 
+        more amenities generally command higher prices. Similarly, the cleaning fee's strong correlation with price 
+        highlights how additional services can influence the overall cost.
+    """)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -101,15 +131,18 @@ def show(df):
     with col2:    
         visualizations.price_distribution_histogram(df_filtered)
 
-    
     with st.expander("Click to see insights from the price analysis"):
         st.write("""
-        - **Correlation**: A map showing how various factors correlate with the price per night.
-        - **Price by Property Type**: A breakdown of how price varies by different property types.                  
-        - **Price Distribution**: A histogram showing the distribution of prices across all properties.
-        """)
+    - **Price by Property Type**: A boxplot analysis reveals that entire accommodations tend to be more expensive than private rooms, 
+        as expected. The average price for an entire property is approximately €105 per night, while private rooms average around €45.
+        This distinction highlights the premium guests are willing to pay more for exclusive access and additional space.                   
+    - **Price Distribution**: A histogram showing the overall distribution of prices across all listings. The majority of listings fall 
+        within a mid-range price bracket(30-50€) with a normal distribution. There are noticeable prices on the higher end, which 
+        correspond to luxury properties or unique experiences. 
+        Understanding the spread of prices provides insights into market trends and potential pricing strategies.
+    """)
 
-    # Visualizaciones relacionadas a Reviews/Ratings
+# Visualizaciones relacionadas a Reviews/Ratings
     col1, col2 = st.columns(2)
     with col1:
         visualizations.rating_distribution(df_filtered)
@@ -120,16 +153,28 @@ def show(df):
 
     with st.expander("Click to see insights from the reviews and ratings visualizations"):
         st.write("""
-        - **Rating Distribution**: Shows the distribution of properties based on their ratings.
-        - **Reviews vs Rating**: Analyzes how the number of reviews correlates with property ratings.
-        - **Reviews vs Price**: Shows how the number of reviews impacts the price per night.
-        """)
+    - **Rating Distribution**: The distribution of ratings for Airbnb listings shows a clear pattern where most properties receive high
+        ratings. A significant proportion of listings have ratings between 4.25 and 5, suggesting that guests generally have positive 
+        experiences.Additionally, the presence of ratings close to 0 may indicate newly listed properties that have not yet accumulated many reviews. 
+    - **Reviews vs Rating**: The scatter plot reveals a positive correlation between the number of reviews, ratings, and the price of 
+        properties. As expected, listings with higher ratings and a greater number of reviews tend to have higher prices. This could 
+        suggest that more established properties with positive reviews command higher prices due to their proven track record and customer satisfaction.
+        This pattern reinforces the idea that higher ratings and reviews can drive up demand and pricing, potentially due to increased 
+        visibility and being trust worthy on the platform.
+    - **Reviews vs Price**: This illustrates the relationship between the number of reviews and the price per night for Airbnb listings. 
+        While there is a general trend showing that properties with a higher number of reviews tend to have higher prices, the data reveals
+        some interesting insights. Lower-priced listings can still receive substantial positive attention and many reviews, possibly 
+        because they appeal to a larger number of guests looking for good budget options.The rest of the data appears to follow a more 
+        typical distribution, where properties with more reviews often maintain higher prices, but there is some randomness in this 
+        relationship. This randomness could be due to various factors such as : unique property features, seasonal price fluctuations, or
+        differing target audiences.
+    """)
 
     st.header('Top 10 Services Offered on Airbnb')
-    df_servicios = pd.read_csv('data/df_servicios_final_cleaned.csv')
-    visualizations.top_10_services_chart(df, df_servicios)
+    visualizations.top_10_services_chart()
 
     with st.expander("Click to see insights from the services analysis"):
         st.write("""
     - **Top 10 Services**: Visualizes the top 10 most offered services on Airbnb in Barcelona.
-    """)        
+    """)
+
