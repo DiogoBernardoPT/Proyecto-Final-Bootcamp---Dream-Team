@@ -13,8 +13,22 @@ from modules.sql_connection import fetch_top_10_services
 # Función para el gráfico de distribución de valoraciones
 def rating_distribution(df):
     st.subheader('Ratings Distribution')
-    rating_hist = px.histogram(df, x='ratings', nbins=20)
+    df_cleaned = df[df['ratings'].between(0, 5)]
+
+    # Criar o histograma ajustado
+    rating_hist = px.histogram(
+        df_cleaned, 
+        x='ratings', 
+        nbins=10,
+        range_x=[0, 5]  # X respectar los limites 0-5
+    )
     rating_hist.update_traces(marker_line_width=1, marker_line_color='black')
+    rating_hist.update_layout(
+        title='Distribution of Ratings',
+        xaxis_title='Ratings (0-5)',
+        yaxis_title='Count',
+        bargap=0.2
+    )
     st.plotly_chart(rating_hist, use_container_width=True, key='rating_hist')
 
 
