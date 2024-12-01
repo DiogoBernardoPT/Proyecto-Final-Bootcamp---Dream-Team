@@ -175,6 +175,9 @@ def show(df):
 
     with st.expander("Click to see insights from the services analysis"):
         st.write("""
-    - **Top 10 Services**: Visualizes the top 10 most offered services on Airbnb in Barcelona.
+    - **Top 10 Services**: The most commonly offered services on Airbnb are likely to be those that provide fundamental comfort and 
+        convenience for guests, such as kitchen facilities, Wi-Fi, hot water, and basic appliances. Travelers prioritize essential services
+        like Wi-Fi for connectivity, kitchen facilities for meal preparation, and hot water and laundry facilities for comfort during 
+        their stay, which is expected.
     """)
 
