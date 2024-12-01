@@ -138,10 +138,8 @@ def show_neural_network_price_prediction(df_processed):
     # Escalonamento das entradas
     features_scaled = x_scaler.transform(input_df)
 
-    # Predição do preço (com os dados escalonados)
+    # Predicciones con los datos escalados
     predicted_price_scaled = model.predict(features_scaled)
-
-    st.write(f"Predicted price (scaled) for Neural Network: {predicted_price_scaled}")
 
     # Desescalonamento do preço previsto
     predicted_price = y_scaler.inverse_transform(predicted_price_scaled.reshape(-1, 1))[0][0]
@@ -149,7 +147,6 @@ def show_neural_network_price_prediction(df_processed):
     st.write(f"**The predicted price for this property is: €{predicted_price:.2f}**.")
 
     st.subheader("Model Evaluation Metrics")
-    st.markdown("### Metrics for the Neural Network Model")
     metrics_df = pd.read_csv("data/simple_nn_metrics.csv") 
 
     st.dataframe(metrics_df)
