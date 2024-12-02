@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from pages_section import landing_page, data_analysis, machine_learning, about
+from pages_section import landing_page, data_analysis, machine_learning, database, about
 
 
 # Cargar el CSV en session_state
@@ -15,7 +15,7 @@ if 'df_processed' not in st.session_state:
     st.session_state.df_processed = df_ml
 
 if 'df_sentiment' not in st.session_state:
-    df_sentiment = pd.read_csv('data/df_sentiment_mean.csv')  # DataFrame para análise de sentimientos
+    df_sentiment = pd.read_csv('data/df_rec_st.csv')  # DataFrame para análise de sentimientos
     st.session_state.df_sentiment = df_sentiment
 
 # Acceder al DataFrame directamente desde session_state
@@ -25,7 +25,7 @@ df_sentiment = st.session_state.df_sentiment
 
 page = st.radio(
     "**🏠 Dear User, choose what you want to discover! 🏠**",
-    ('Home', 'Data Analysis', 'Machine Learning', 'About'),
+    ('Home', 'Data Analysis', 'Machine Learning', 'Database', 'About'),
     horizontal=True
 )
 
@@ -35,5 +35,7 @@ elif page == 'Data Analysis':
     data_analysis.show(df)
 elif page == 'Machine Learning':
     machine_learning.show()
+elif page == 'Database':
+    database.show()    
 elif page == 'About':
     about.show()
