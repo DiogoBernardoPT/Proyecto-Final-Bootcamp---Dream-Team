@@ -12,25 +12,38 @@ def show():
     Feel free to reach out to us through our profiles.
     """)
 
-    # Criar duas colunas para os perfis de Diogo e Jesus
     col1, col2 = st.columns(2)
 
-    # Perfil do Diogo
+    # Perfil Diogo
     with col1:
-        st.subheader("Diogo")
-        st.markdown("""
-        **GitHub**: [GitHub Profile](https://github.com/DiogoBernardoPT)
-        **LinkedIn**: [LinkedIn Profile](https://www.linkedin.com/in/diogogalhanas)
-        """)
-        st.image("https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg", width=50)
-        
+        st.subheader("Diogo Bernardo")
+        st.markdown(
+            """
+            <p>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" width="20" style="vertical-align: middle; margin-right: 10px;">
+                <a href="https://github.com/DiogoBernardoPT" target="_blank">GitHub Profile</a>
+            </p>
+            <p>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" width="20" style="vertical-align: middle; margin-right: 10px;">
+                <a href="https://www.linkedin.com/in/diogogalhanas" target="_blank">LinkedIn Profile</a>
+            </p>
+            """,
+            unsafe_allow_html=True,
+        )
 
-
-    # Perfil do Jesus
+    # Perfil Jesus
     with col2:
-        st.subheader("Jesus")
-        st.markdown("""
-        **GitHub**: [GitHub Profile](https://github.com/jesus27mula)
-        **LinkedIn**: [LinkedIn Profile](https://www.linkedin.com/in/jesus-maria-mulà-domènech)
-        """)
-        st.image("https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg", width=50)
+        st.subheader("Jesus Domènech")
+        st.markdown(
+            """
+            <p>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" width="20" style="vertical-align: middle; margin-right: 10px;">
+                <a href="https://github.com/jesus27mula" target="_blank">GitHub Profile</a>
+            </p>
+            <p>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" width="20" style="vertical-align: middle; margin-right: 10px;">
+                <a href="https://www.linkedin.com/in/jesus-maria-mulà-domènech" target="_blank">LinkedIn Profile</a>
+            </p>
+            """,
+            unsafe_allow_html=True,
+        )

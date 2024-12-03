@@ -7,7 +7,7 @@ def show():
     st.title('Welcome to the Airbnb Data Analysis Dashboard')
 
     # Create two columns
-    col1, col2 = st.columns([1, 2])  # Adjust column proportions as needed
+    col1, col2 = st.columns([1, 2])
 
     with col1:
         st.markdown('''
@@ -51,3 +51,4 @@ def show():
     with col2:
         st.image('images/airbnb_1stpage.png', use_column_width=True)
         st.image('images/airbnb_1stpage_2.png', use_column_width=True)
+        st.image('images/language tools Final project.png', use_column_width=True)

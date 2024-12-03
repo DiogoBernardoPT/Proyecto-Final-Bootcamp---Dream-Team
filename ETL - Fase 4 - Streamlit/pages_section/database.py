@@ -1,13 +1,10 @@
 import streamlit as st
 
 def show():
-    # Exibir título
-    st.title("📊 Database Architecture")
+    st.title("🛠️ Database Architecture")
 
-    # Exibir o diagrama do banco de dados (coloque a imagem na pasta 'images')
     st.image("images/sqlschema.png", caption="Database Architecture Diagram", width=600)
 
-    # Explicação sobre a arquitetura do banco de dados
     st.header("Tables and Columns Overview")
 
     st.write("""
