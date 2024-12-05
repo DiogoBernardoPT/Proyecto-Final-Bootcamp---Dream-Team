@@ -138,11 +138,7 @@ def show_neural_network_price_prediction(df_processed):
     x_scaler, y_scaler = load_scalers()
     input_scaled = x_scaler.transform(user_input)
 
-    st.write("Input features (scaled):", input_scaled)
-
     predicted_price_scaled = model.predict(input_scaled)
-    st.write(f"Predicted price (scaled): {predicted_price_scaled}")
-
     predicted_price = y_scaler.inverse_transform(predicted_price_scaled.reshape(-1, 1))[0][0]
 
     st.write(f"**The predicted price for this property is: €{predicted_price:.2f}**.")  
@@ -170,7 +166,6 @@ def show_recommender_and_nlp(df_sentiment):
     models = load_models()
     nn_model = models["recommendation"]
 
-    # Input fields for the user to simulate an Airbnb
     st.subheader("Enter the Airbnb features:")
     max_guests = st.sidebar.selectbox("Maximum Guests", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], index=2)
     bedrooms = st.sidebar.selectbox("Number of Bedrooms", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], index=1)
@@ -178,7 +173,6 @@ def show_recommender_and_nlp(df_sentiment):
     bathrooms = st.sidebar.selectbox("Number of Bathrooms", [1, 2, 3, 4, 5], index=1)
     cleaning_fee = st.sidebar.slider("Cleaning Fee (€)", min_value=0, value=50)
 
-    # Pre-process user input to match training data
     user_input = pd.DataFrame({
         "maximum_guests": [max_guests],
         "bedrooms": [bedrooms],
