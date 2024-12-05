@@ -172,6 +172,7 @@ def show_recommender_and_nlp(df_sentiment):
     beds = st.sidebar.selectbox("Number of Beds", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], index=1)
     bathrooms = st.sidebar.selectbox("Number of Bathrooms", [1, 2, 3, 4, 5], index=1)
     cleaning_fee = st.sidebar.slider("Cleaning Fee (€)", min_value=0, value=50)
+    prices_per_night = st.sidebar.slider("Prices per night (€)", min_value=0, max_value=450, value = 120)
 
     user_input = pd.DataFrame({
         "maximum_guests": [max_guests],
@@ -179,11 +180,12 @@ def show_recommender_and_nlp(df_sentiment):
         "beds": [beds],
         "bathrooms": [bathrooms],
         "cleaning_fee": [cleaning_fee],
+        "prices_per_night" : [prices_per_night]
     })
 
     # Asegurarse de que la entrada del usuario coincida con las características esperadas por el modelo
-    all_features = df_sentiment.drop(columns=['url', 'cantidad_comentarios', 'polaridad_media', 'subjetividad_media', 
-                                              'palabras_mas_usadas', 'sentimiento']).columns
+    all_features = df_sentiment.drop(columns=['url', 'prices_per_night', 'cantidad_comentarios', 'polaridad_media', 'subjetividad_media', 
+                                              'palabras_mas_usadas', 'sentimiento']).columns 
     
     # Rellenar las columnas faltantes con sus valores medios
     for col in all_features:
