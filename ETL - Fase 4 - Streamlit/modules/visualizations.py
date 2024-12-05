@@ -10,26 +10,62 @@ from modules.sql_connection import fetch_top_10_services
 # Exploratory Data Analysis
 # =====================================
 
-# Función para el gráfico de distribución de valoraciones
 def rating_distribution(df):
     st.subheader('Ratings Distribution')
+
+    # Filtrar dados válidos
     df_cleaned = df[df['ratings'].between(0, 5)]
 
-    # Criar o histograma ajustado
-    rating_hist = px.histogram(
-        df_cleaned, 
-        x='ratings', 
-        nbins=10,
-        range_x=[0, 5]  # X respectar los limites 0-5
+    # Separar novos alojamentos (ratings = 0)
+    new_properties_count = df_cleaned[df_cleaned['ratings'] == 0].shape[0]
+    rated_properties = df_cleaned[df_cleaned['ratings'] > 0]
+
+    # Definir bins personalizados
+    bins = [3.5, 4.0, 4.5, 4.75, 5.0]
+    labels = ['3.5-3.99', '4.0-4.49', '4.5-4.74', '4.75-5.0']
+
+    # Categorizar ratings usando bins
+    rated_properties['rating_bins'] = pd.cut(
+        rated_properties['ratings'], bins=bins, labels=labels, include_lowest=True
     )
-    rating_hist.update_traces(marker_line_width=1, marker_line_color='black')
+
+    # Combinar contagens de novos e categorizados
+    count_bins = rated_properties['rating_bins'].value_counts(sort=False)
+    count_bins = pd.concat(
+        [pd.Series([new_properties_count], index=['0 (New)']), count_bins]
+    ).reset_index()
+    count_bins.columns = ['rating_range', 'count']  # Renomear colunas para compatibilidade
+
+    # Garantir a ordem correta
+    count_bins['rating_range'] = pd.Categorical(
+        count_bins['rating_range'], 
+        categories=['0 (New)'] + labels,  # Ordem desejada
+        ordered=True
+    )
+    count_bins = count_bins.sort_values('rating_range')
+
+    # Criar gráfico de barras
+    rating_hist = px.bar(
+        count_bins,
+        x='rating_range',
+        y='count',
+        text='count',
+        labels={'rating_range': 'Rating Ranges', 'count': 'Count'},
+        title='Distribution of Ratings'
+    )
+    rating_hist.update_traces(
+        texttemplate='%{y}', 
+        textposition='outside',
+        marker=dict(line=dict(width=1, color='black')),
+    )
     rating_hist.update_layout(
-        title='Distribution of Ratings',
-        xaxis_title='Ratings (0-5)',
-        yaxis_title='Count',
+        yaxis=dict(title='Count', type='log'),  # Escala logarítmica
+        xaxis_title='Rating Ranges',
         bargap=0.2
     )
+
     st.plotly_chart(rating_hist, use_container_width=True, key='rating_hist')
+
 
 
 # Función para la gráfica de dispersión de precio vs número de reseñas
@@ -48,10 +84,14 @@ def reviews_rating_distribution(df):
         log_x=True,
         color='prices_per_night',
         hover_name='property_types',
-        opacity=0.5,
+        opacity=0.7,
         size='prices_per_night',
-        size_max=15,
+        size_max=20,
+        color_continuous_scale=px.colors.sequential.Plasma,
     )
+
+    reviews_rating_distr.update_traces(marker=dict(line=dict(width=0.5, color="black")))
+
     st.plotly_chart(reviews_rating_distr, use_container_width=True)
 
 # Price Outliers
