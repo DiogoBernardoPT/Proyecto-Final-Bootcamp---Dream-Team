@@ -35,10 +35,10 @@ def show_price_prediction(df_processed):
     # Entradas del usuario
     st.subheader("Please enter the following details about the property:")
 
-    max_guests = st.sidebar.slider("Maximum Guests", min_value=1, max_value=10, value=4)
-    bedrooms = st.sidebar.slider("Number of Bedrooms", min_value=1, max_value=10, value=2)
-    beds = st.sidebar.slider("Number of Beds", min_value=1, max_value=10, value=2)
-    bathrooms = st.sidebar.slider("Number of Bathrooms", min_value=1, max_value=5, value=1)
+    max_guests = st.sidebar.selectbox("Maximum Guests", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], index=2)
+    bedrooms = st.sidebar.selectbox("Number of Bedrooms", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], index=1)
+    beds = st.sidebar.selectbox("Number of Beds", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], index=1)
+    bathrooms = st.sidebar.selectbox("Number of Bathrooms", [1, 2, 3, 4, 5], index=1)
     cleaning_fee = st.sidebar.slider("Cleaning Fee (€)", min_value=0, value=50)
 
     # Crear un DataFrame con las entradas del usuario
@@ -92,10 +92,9 @@ def show_price_prediction(df_processed):
     st.dataframe(metrics_df)
 
     with st.expander("Feature Importance Chart"):
-    # Call the visualization function
+    # Llamar la visualizacion en visualizations.py
         show_feature_importance()
     
-    # Write the hypothesis below the chart
         st.write("""
         - **Ratings**: Properties with higher ratings are likely to command premium prices, reflecting customer satisfaction.
         - **Number of Reviews**: A higher number of reviews often indicates popularity and demand.
@@ -112,59 +111,44 @@ def show_neural_network_price_prediction(df_processed):
     models = load_models()
     model = models["neural_network"]
 
-    knn_imputer = joblib.load("models/knn_imputer.pkl")
-
     st.subheader("Please enter the following details about the property:")
 
-    max_guests = st.sidebar.slider("Maximum Guests", min_value=1, max_value=10, value=4)
-    bedrooms = st.sidebar.slider("Number of Bedrooms", min_value=1, max_value=10, value=2)
-    beds = st.sidebar.slider("Number of Beds", min_value=1, max_value=10, value=2)
-    bathrooms = st.sidebar.slider("Number of Bathrooms", min_value=1, max_value=5, value=1)
+    max_guests = st.sidebar.selectbox("Maximum Guests", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], index=2)
+    bedrooms = st.sidebar.selectbox("Number of Bedrooms", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], index=1)
+    beds = st.sidebar.selectbox("Number of Beds", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], index=1)
+    bathrooms = st.sidebar.selectbox("Number of Bathrooms", [1, 2, 3, 4, 5], index=1)
     cleaning_fee = st.sidebar.slider("Cleaning Fee (€)", min_value=0, value=50)
 
-    user_input = {
-        "maximum_guests": max_guests,
-        "dormitorios": bedrooms,
-        "camas": beds,
-        "baños": bathrooms,
-        "cleaning_fee": cleaning_fee
-    }
+    user_input = pd.DataFrame({
+    "maximum_guests": [max_guests],
+    "dormitorios": [bedrooms],
+    "camas": [beds],
+    "baños": [bathrooms],
+    "cleaning_fee": [cleaning_fee]
+    })
 
-    input_df = pd.DataFrame(user_input, index=[0])
+    all_features = df_processed.drop(columns=["prices_per_night"]).columns
+    for col in all_features:
+        if col not in user_input.columns:
+            mean_value = df_processed[col].mean() if col in df_processed.columns else 0
+            user_input[col] = mean_value
 
-    columns_to_impute = [col for col in df_processed.columns if col not in user_input and col != "prices_per_night"]
-
-    for col in columns_to_impute:
-        input_df[col] = np.nan
-
-    expected_columns = df_processed.drop(columns=["prices_per_night"]).columns
-
-    for col in expected_columns:
-        if col not in input_df.columns:
-            input_df[col] = np.nan
-
-    input_df = input_df[expected_columns]
-
-    imputed_values = knn_imputer.transform(input_df)
-    for i, col in enumerate(columns_to_impute):
-        input_df[col] = imputed_values[0][i]
+    user_input = user_input[all_features]        
 
     x_scaler, y_scaler = load_scalers()
+    input_scaled = x_scaler.transform(user_input)
 
-    # Escalonamento das entradas
-    features_scaled = x_scaler.transform(input_df)
+    st.write("Input features (scaled):", input_scaled)
 
-    # Predicciones con los datos escalados
-    predicted_price_scaled = model.predict(features_scaled)
+    predicted_price_scaled = model.predict(input_scaled)
+    st.write(f"Predicted price (scaled): {predicted_price_scaled}")
 
-    # Desescalonamento do preço previsto
     predicted_price = y_scaler.inverse_transform(predicted_price_scaled.reshape(-1, 1))[0][0]
 
-    st.write(f"**The predicted price for this property is: €{predicted_price:.2f}**.")
+    st.write(f"**The predicted price for this property is: €{predicted_price:.2f}**.")  
 
     st.subheader("Model Evaluation Metrics")
-    metrics_df = pd.read_csv("data/simple_nn_metrics.csv") 
-
+    metrics_df = pd.read_csv("data/simple_nn_metrics.csv")
     st.dataframe(metrics_df)
 
     st.subheader("Model Training and Validation Loss")
@@ -176,9 +160,79 @@ def show_neural_network_price_prediction(df_processed):
     st.plotly_chart(real_vs_pred_fig)
 
 
-def show_recommender_and_nlp(df_processed, df_sentiment):
+def show_recommender_and_nlp(df_sentiment):
+    """
+    Muestra el Sistema de Recomendaciones y Análisis de Sentimientos en la misma página.
+    """
     st.header("🏘️ Recommender System + Sentiment Analysis")
-    st.write("Select an Airbnb to view sentiment analysis and recommendations.")
+    st.write("Enter details about an Airbnb to get sentiment analysis and similar recommendations.")
+
+    models = load_models()
+    nn_model = models["recommendation"]
+
+    # Input fields for the user to simulate an Airbnb
+    st.subheader("Enter the Airbnb features:")
+    max_guests = st.sidebar.selectbox("Maximum Guests", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], index=2)
+    bedrooms = st.sidebar.selectbox("Number of Bedrooms", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], index=1)
+    beds = st.sidebar.selectbox("Number of Beds", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], index=1)
+    bathrooms = st.sidebar.selectbox("Number of Bathrooms", [1, 2, 3, 4, 5], index=1)
+    cleaning_fee = st.sidebar.slider("Cleaning Fee (€)", min_value=0, value=50)
+
+    # Pre-process user input to match training data
+    user_input = pd.DataFrame({
+        "maximum_guests": [max_guests],
+        "bedrooms": [bedrooms],
+        "beds": [beds],
+        "bathrooms": [bathrooms],
+        "cleaning_fee": [cleaning_fee],
+    })
+
+    # Asegurarse de que la entrada del usuario coincida con las características esperadas por el modelo
+    all_features = df_sentiment.drop(columns=['url', 'cantidad_comentarios', 'polaridad_media', 'subjetividad_media', 
+                                              'palabras_mas_usadas', 'sentimiento']).columns
+    
+    # Rellenar las columnas faltantes con sus valores medios
+    for col in all_features:
+        if col not in user_input.columns:
+            mean_value = df_sentiment[col].mean() if col in df_sentiment.columns else 0
+            user_input[col] = mean_value
+
+    user_input = user_input[all_features]  # Asegurar el orden de las características
+
+    # Botón recomendaciones
+    if st.button("Find Similar Airbnbs"):
+        recommendations = recommend_airbnbs(user_input, df_sentiment, nn_model)
+
+        st.subheader("Recommended Airbnbs:")
+        for i, row in recommendations.iterrows():
+            st.write(f"**Recommendation {i + 1}:**")
+            display_airbnb_info(row)
+
+
+def recommend_airbnbs(user_input, df, model):
+    """
+    Obtener recomendaciones basadas en la entrada del usuario y el modelo entrenado de NearestNeighbors.
+    """
+    # Usar el modelo para encontrar los vecinos más cercanos
+    distances, indices = model.kneighbors(user_input.values)
+
+    # # Recuperar los Airbnbs más similares
+    recommended_airbnbs = df.iloc[indices[0]]
+
+    return recommended_airbnbs
+
+
+def display_airbnb_info(airbnb):
+    """
+    Muestra la información detallada sobre un Airbnb.
+    """
+    st.write(f"- **URL**: [View Airbnb]({airbnb['url']})")
+    st.write(f"- **Price**: {airbnb['prices_per_night']} €")
+    st.write(f"- **Average Polarity**: {airbnb['polaridad_media']}")
+    st.write(f"- **Average Subjectivity**: {airbnb['subjetividad_media']}")
+    st.write(f"- **Most Used Words**: {airbnb['palabras_mas_usadas']}")
+    st.write(f"- **Sentiment**: {airbnb['sentimiento']}")
+
     
 def show_model_explanation(model_choice):
     st.subheader("Model Explanation")
@@ -232,4 +286,4 @@ def show():
     elif model_choice == "Price Prediction - Neural Networks":
         show_neural_network_price_prediction(df_processed)
     elif model_choice == "Recommender + NLP Sentiment Analysis":
-        show_recommender_and_nlp(df_processed, df_sentiment)
+        show_recommender_and_nlp(df_sentiment)
