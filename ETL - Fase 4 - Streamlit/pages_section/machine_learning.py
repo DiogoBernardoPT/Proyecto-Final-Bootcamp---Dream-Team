@@ -184,8 +184,11 @@ def show_recommender_and_nlp(df_sentiment):
     })
 
     # Asegurarse de que la entrada del usuario coincida con las características esperadas por el modelo
-    all_features = df_sentiment.drop(columns=['url', 'prices_per_night', 'cantidad_comentarios', 'polaridad_media', 'subjetividad_media', 
-                                              'palabras_mas_usadas', 'sentimiento']).columns 
+    all_features = df_sentiment.drop(columns=['url',  'cantidad_comentarios', 'polaridad_media', 'subjetividad_media', 
+                                              'palabras_mas_usadas', 'sentimiento','ratings','check_in_hour', 'check_out_hour','total_hours_checkin',
+                                              'log_num_reviews','aparcamiento e instalaciones', 'baño', 'calefacción y refrigeración', 'características de la ubicación', 
+                                              'cocina y comedor','dormitorio y lavandería', 'entretenimiento', 'exterior','internet y oficina', 'para familias', 
+                                              'privacidad y seguridad','seguridad en el hogar', 'servicios', 'habitacion','alojamiento entero']).columns #'prices_per_night',
     
     # Rellenar las columnas faltantes con sus valores medios
     for col in all_features:
